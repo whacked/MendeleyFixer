@@ -1,0 +1,30 @@
+stuff to deal with mendeley.
+
+there is one script at the moment
+
+* BibDesk file importer, if you are jumping ship from BibDesk
+
+if you have a bunch of files linked inside BibDesk and want to save some time importing them into mendeley
+
+use this script after you did File > open [your bibdesk file] from mendeley
+
+if you have lots of dupes from the import, see [[http://simon.net.nz/articles/deleting-duplicate-records-in-mendeley/]]
+
+insert_file.py will read through your bibdesk file and look for (pdf|PDF|xoj) files, try to find matching documents by title in your mendeley database
+
+modify the regexp to detect other files like doc.
+
+if it finds a match, and does not see a matching file hash in the sqlite db, it tries to insert it
+
+*the file hash in the mendeley db is simply a SHA1 on the binary data of the file*
+
+if you have multiple files, it says so, and doesn't insert. you can easily modify it so that it does insert.
+
+so after you modify the two paths:
+  - PATH_TO_BIBDESK_BIB = the .bib file
+  - PATH_TO_MENDELEY_DB = the .sqlite file, if you use a mac it should be /User/yourname/Library/Application Support/Mendeley Desktop/youremail@yourdomain.com@www.mendeley.com.sqlite
+    if you didn't create an online account i think it's called online.sqlite
+
+  - *BACKUP YOUR .sqlite FILE BEFORE RUNNING!!!*
+  - *also make sure you quit Mendeley Desktop before running!*
+  - run python insert_file.py. if you don't supply the mendeley db path it will just read through the bib file and print out what it found
