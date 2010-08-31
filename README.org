@@ -22,9 +22,11 @@ if you have multiple files, it says so, and doesn't insert. you can easily modif
 
 so after you modify the two paths:
   - PATH_TO_BIBDESK_BIB = the .bib file
-  - PATH_TO_MENDELEY_DB = the .sqlite file, if you use a mac it should be /User/yourname/Library/Application Support/Mendeley Desktop/youremail@yourdomain.com@www.mendeley.com.sqlite
-    if you didn't create an online account i think it's called online.sqlite
+  - PATH_TO_MENDELEY_DB = the .sqlite file, if you use a mac it should be /User/yourname/Library/Application Support/Mendeley Desktop/youremail@yourdomain.com@www.mendeley.com.sqlite (if you didn't create an online account i think it's called online.sqlite)
 
+then:
   - *BACKUP YOUR .sqlite FILE BEFORE RUNNING!!!*
   - *also make sure you quit Mendeley Desktop before running!*
   - run python insert_file.py. if you don't supply the mendeley db path it will just read through the bib file and print out what it found
+  - reopen Mendeley, hopefully your files got linked!
+
