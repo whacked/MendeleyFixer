@@ -1,7 +1,5 @@
 stuff to deal with mendeley.
 
-there is one script at the moment
-
 * BibDesk file importer, if you are jumping ship from BibDesk
 
 if you have a bunch of files linked inside BibDesk and want to save some time importing them into mendeley
@@ -29,4 +27,10 @@ then:
   - *also make sure you quit Mendeley Desktop before running!*
   - run python insert_file.py. if you don't supply the mendeley db path it will just read through the bib file and print out what it found
   - reopen Mendeley, hopefully your files got linked!
+
+* localUrl converter for sqlite db
+
+Run this after syncing Mendeley's sqlite db file to another machine so it finds the files
+
+Documentation and ruby script is contained in the org file.
 
