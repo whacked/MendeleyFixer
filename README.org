@@ -1,5 +1,7 @@
 stuff to deal with mendeley.
 
+*Written on and tested only on OS X, python 2.6, ruby 1.9. Use for great good, at your own risk!*
+
 * BibDesk file importer, if you are jumping ship from BibDesk
 
 if you have a bunch of files linked inside BibDesk and want to save some time importing them into mendeley
