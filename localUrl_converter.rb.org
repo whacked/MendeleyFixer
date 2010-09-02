@@ -1,0 +1,86 @@
+#+TITLE: convert localUrl in Mendeley Desktop sqlite after syncing
+
+# org doesn't seem to play well unless there is a
+# trailing newline after the final line in the comment :((((
+# contrary to the docs, BEGIN_COMMENT blocks DO get exported!
+#+STYLE: <style> .org-comment { display: none; } </style>
+
+#+BEGIN_COMMENT :export none
+<<RUBYREADME
+
+#+END_COMMENT
+
+# <<ORG-README>>
+* Synopsis
+  
+  We have multiple machines we want to sync refs with Mendeley Desktop. For files, we run our own VCS repo and we sync with that. It turns out that even if you symlink =~/Library/Application Support/Mendeley Desktop/Downloaded=, i.e.:
+
+#+begin_src sh
+ln -s /PATH/TO/YOUR/PDF/DIR ~/Library/Application Support/Mendeley Desktop/Downloaded
+#+end_src
+
+  across all machines, since Mendeley Desktop uses absolute filepaths in the local sqlite db file, it won't pick up the files. The simplest solution then seems to directly sync the sqlite file; we now added this file to our repo and sync this too. For the "master" machine we then symlink from the repo's sqlite file to =~/Library/Application Support/Mendeley Desktop/=
+
+  If you opt for this method, after you sync your sqlite file in a "non master" machine, move it into =~/Library/Application Support/Mendeley Desktop/=, you can use this script to rename the localUrl in the sqlite file to point to the proper location in your machine.
+
+* Usage
+
+  - modify =mendeley_email= in [[ruby block]] to your mendeley account email.
+  
+  Execute this file directly with =ruby localUrl_converter.rb.org=
+  
+  Or, if you have org-babel with ruby support, C-c C-c in the [[ruby block]].
+
+  =DRY_RUN= is set to =true=, which causes it to just print out sql statements and not change anything
+
+  when you are happy with the sql you see, change =DRY_RUN= to =false= and re-execute. Good luck!
+
+#+BEGIN_COMMENT
+RUBYREADME
+
+#+END_COMMENT
+
+
+# <<ruby block>>
+#+BEGIN_SRC ruby :results output
+  DRY_RUN = true
+  mendeley_email = "YOUR_MENDELEY_EMAIL@"
+
+  require "sqlite3"
+  require "fileutils"
+  local_username = `whoami`.chomp
+  
+  dc_conversion = {
+    /^file:\/\/\/Users\/[^\/]+\/Library/ => "file:///Users/#{local_username}/Library",
+    # set up other conversion mappings here if you need any
+  }
+  
+  DB_PATH = "/Users/#{local_username}/Library/Application Support/Mendeley Desktop/#{mendeley_email}@www.mendeley.com.sqlite"
+  BACKUP_PATH = "#{DB_PATH}.back"
+  
+  if File.exists? BACKUP_PATH then
+    print "the backup file:\n  #{BACKUP_PATH}\nexists. overwrite? [Y/n] "
+    if gets.chomp != 'Y' then
+      puts "\nyou didn't say Y... so do something about it!\n"
+      exit
+    end
+  end
+  puts "backing up file..."
+  puts "writing: #{BACKUP_PATH}"
+  FileUtils.cp(DB_PATH, BACKUP_PATH, {:verbose => true})
+  
+  db = SQLite3::Database.open DB_PATH
+  
+  ls_row = db.execute("SELECT * FROM Files")
+  
+  ls_row.each do |hash, localUrl|
+    dc_conversion.each do |search, replace|
+      localUrl.gsub!(search, replace)
+    end
+    sql = "UPDATE Files SET localUrl = '#{SQLite3::Database.quote(localUrl)}' WHERE hash = '#{hash}'"
+    puts sql
+  
+    db.execute(sql) unless DRY_RUN
+  end
+  puts "\nDONE!\n"
+#+END_SRC
