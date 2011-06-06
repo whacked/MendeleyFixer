@@ -48,25 +48,40 @@ if __name__ == "__main__":
                              Column('documentId', Integer, ForeignKey('Documents.id')),
                              Column('folderId', Integer, ForeignKey('Folders.id')),
                              extend_existing = True)
-    class MFile(object): pass
+    class MFile(object):
+        def __repr__(self):
+            return "[%s] %s" % (self.hash, self.localUrl)
     mapper(MFile, tbl_Files, primary_key=[tbl_Files.c.hash])
+
+    class MFolder(object):
+        def __repr__(self):
+            return self.name
+    mapper(MFolder, tbl_Folders)
 
     class MDocumentContributor(object):
         documentId = Column(Integer, ForeignKey(tbl_Documents.c.id))
+        def __repr__(self):
+            return "%s, %s (%s)" % (self.lastName, self.firstNames, self.contribution)
     mapper(MDocumentContributor, tbl_DocumentContributors)
 
-    class MDocumentKeyword(object): pass
-    mapper(MDocumentKeyword, tbl_DocumentTags)
+    class MDocumentKeyword(object):
+        documentId = Column(Integer, ForeignKey(tbl_Documents.c.id))
+        def __repr__(self):
+            return self.keyword
+    mapper(MDocumentKeyword, tbl_DocumentKeywords)
 
-    class MDocumentTag(object): pass
+    class MDocumentTag(object):
+        documentId = Column(Integer, ForeignKey(tbl_Documents.c.id))
+        def __repr__(self):
+            return self.tag
     mapper(MDocumentTag, tbl_DocumentTags)
 
-    class MDocumentUrl(object): pass
+    class MDocumentUrl(object):
+        documentId = Column(Integer, ForeignKey(tbl_Documents.c.id))
+        def __repr__(self):
+            return "(%s) %s" % (self.position, self.url)
     mapper(MDocumentUrl, tbl_DocumentUrls)
     
-    class MFolder(object): pass
-    mapper(MFolder, tbl_Folders)
-
     class MDocument(object):
         def __init__(self, documentId):
             try:
@@ -79,18 +94,28 @@ if __name__ == "__main__":
     mapper(MDocument, tbl_Documents,
            primary_key=[tbl_Documents.c.id],
            properties={    
-            'files': relationship(MFile, secondary=MDocumentFiles),
+            'files':        relationship(MFile, secondary=MDocumentFiles),
+            'folders':      relationship(MFolder, secondary=MDocumentFolders),
+            
             # shouldn't need backref here, not trying it out
             #'contributors': relationship(MDocumentContributor, backref="Documents"),
             'contributors': relationship(MDocumentContributor,
                                          primaryjoin = and_(tbl_Documents.c.id == tbl_DocumentContributors.c.documentId),
                                          # don't fully understand this, but without it it fails to know the direction of join
-                                         foreign_keys = [tbl_DocumentContributors.c.documentId],
-                                         ),
+                                         foreign_keys = [tbl_DocumentContributors.c.documentId]),
+            'urls':         relationship(MDocumentUrl,
+                                         primaryjoin = and_(tbl_Documents.c.id == tbl_DocumentUrls.c.documentId),
+                                         foreign_keys = [tbl_DocumentUrls.c.documentId]),
+            'keywords':     relationship(MDocumentKeyword,
+                                         primaryjoin = and_(tbl_Documents.c.id == tbl_DocumentKeywords.c.documentId),
+                                         foreign_keys = [tbl_DocumentKeywords.c.documentId]),
+            'tags':         relationship(MDocumentTag,
+                                         primaryjoin = and_(tbl_Documents.c.id == tbl_DocumentTags.c.documentId),
+                                         foreign_keys = [tbl_DocumentTags.c.documentId]),
             })
     
     
-    #z=db_session.query(MDocument).filter_by(id = 2).one()
+    z=db_session.query(MDocument).filter_by(id = 2).one()
     #z=db_session.query(MDocumentContributor).filter_by(id = 10).one().contribution
 
     #sqlalchemy.orm.clear_mappers()
