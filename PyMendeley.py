@@ -14,7 +14,7 @@ from sqlalchemy.ext.sqlsoup import SqlSoup
 execfile("MendeleyConfig.py")
 
 dsn_db = "sqlite:///%s" % db_path
-db_engine = sqlalchemy.create_engine(dsn_db, echo = True)
+db_engine = sqlalchemy.create_engine(dsn_db, echo = False)
 
 db_sessionmaker = sessionmaker(bind = db_engine)
 db_session = db_sessionmaker()
@@ -44,8 +44,7 @@ MDocumentFiles = Table('DocumentFiles', metadata,
                        Column('hash', CHAR(40), ForeignKey('Files.hash')))
 MDocumentFolders = Table('DocumentFolders', metadata,
                          Column('documentId', Integer, ForeignKey('Documents.id')),
-                         Column('folderId', Integer, ForeignKey('Folders.id')),
-                         extend_existing = True)
+                         Column('folderId', Integer, ForeignKey('Folders.id')))
 class MFile(object):
     def __repr__(self):
         return "[%s] %s" % (self.hash, self.localUrl)
@@ -85,8 +84,8 @@ class MDocument(object):
         try:
             _res = db_session.query(self.__class__).filter_by(id = documentId).one()
             self.__dict__ = _res.__dict__
-            self.files = _res.files
-            #self.files = _res.contributors
+            for attr in ('files', 'folders', 'contributors', 'tags', 'keywords', 'urls'):
+                setattr(self, attr, getattr(_res, attr))
         except sqlalchemy.orm.exc.NoResultFound, e:
             pass
 mapper(MDocument, tbl_Documents,
