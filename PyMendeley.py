@@ -10,12 +10,10 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from sqlalchemy.ext.sqlsoup import SqlSoup
 
-# provides db_path
-from MendeleyConfig import db_path
+# get db_path from here
+execfile("MendeleyConfig.py")
 
 if __name__ == "__main__":
-    
-
 
     dsn_db = "sqlite:///%s" % db_path
     db_engine = sqlalchemy.create_engine(dsn_db, echo = True)
@@ -34,24 +32,40 @@ if __name__ == "__main__":
     #Base = declarative_base()
     #Base.metadata = metadata
 
-    tbl_Documents = Table('Documents', metadata, autoload=True)
-    tbl_Files     = Table('Files', metadata, autoload = True)
-    tbl_DocumentContributors = Table('DocumentContributors', metadata, autoload = True)
+    tbl_Documents            = Table('Documents',            metadata, autoload=True)
+    tbl_Files                = Table('Files',                metadata, autoload=True)
+    tbl_DocumentContributors = Table('DocumentContributors', metadata, autoload=True)
+    tbl_DocumentKeywords     = Table('DocumentKeywords',     metadata, autoload=True)
+    tbl_DocumentTags         = Table('DocumentTags',         metadata, autoload=True)
+    tbl_DocumentUrls         = Table('DocumentUrls',         metadata, autoload=True)
+    tbl_Folders              = Table('Folders',              metadata, autoload=True)
+
     # association table
     MDocumentFiles = Table('DocumentFiles', metadata,
                            Column('documentId', Integer, ForeignKey('Documents.id')),
-                           Column('hash', CHAR(40), ForeignKey('Files.hash')),
-                           extend_existing=True
-                          )
-    class MFile(object):
-        def __init__(self):
-            pass
+                           Column('hash', CHAR(40), ForeignKey('Files.hash')))
+    MDocumentFolders = Table('DocumentFolders', metadata,
+                             Column('documentId', Integer, ForeignKey('Documents.id')),
+                             Column('folderId', Integer, ForeignKey('Folders.id')),
+                             extend_existing = True)
+    class MFile(object): pass
     mapper(MFile, tbl_Files, primary_key=[tbl_Files.c.hash])
 
     class MDocumentContributor(object):
         documentId = Column(Integer, ForeignKey(tbl_Documents.c.id))
-        pass
     mapper(MDocumentContributor, tbl_DocumentContributors)
+
+    class MDocumentKeyword(object): pass
+    mapper(MDocumentKeyword, tbl_DocumentTags)
+
+    class MDocumentTag(object): pass
+    mapper(MDocumentTag, tbl_DocumentTags)
+
+    class MDocumentUrl(object): pass
+    mapper(MDocumentUrl, tbl_DocumentUrls)
+    
+    class MFolder(object): pass
+    mapper(MFolder, tbl_Folders)
 
     class MDocument(object):
         def __init__(self, documentId):
