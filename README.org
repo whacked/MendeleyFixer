@@ -1,8 +1,32 @@
-stuff to deal with mendeley.
+Stuff to deal with mendeley. *Use for great good, at your own risk!*
 
-*Written on and tested only on OS X, python 2.6, ruby 1.9. Use for great good, at your own risk!*
+* Python utility class for playing with the Mendeley data on your machine
+
+  - "/works for me/" on ubuntu 11.04, python 2.7, *sqlalchemy 0.7.0*
+  
+  Basic class-db mappings to most of the useful tables in the Mendeley database /(as of 2011-06-02)/
+
+  =MDocument= is the main class.
+      
+** example usage:
+
+#+begin_example
+entry = db_session.query(MDocument).filter_by(id = 1).one()
+print [file.localUrl for file in entry.files]
+print [contributor.getFullName() for contributor in entry.contributors]
+print entry.urls
+print entry.keywords
+print entry.tags
+
+print entry.doi
+print entry.pmid
+
+#+end_example
+
 
 * BibDesk file importer, if you are jumping ship from BibDesk
+
+  - "/works for me/" on *OS X, python 2.6, ruby 1.9*
 
 if you have a bunch of files linked inside BibDesk and want to save some time importing them into mendeley
 
@@ -31,6 +55,9 @@ then:
   - reopen Mendeley, hopefully your files got linked!
 
 * localUrl converter for sqlite db
+
+  - "/works for me/" on *OS X, python 2.6, ruby 1.9*
+  - "/works for me/" on *ubuntu 10.10, python 2.6, ruby 1.9*
 
 Run this after syncing Mendeley's sqlite db file to another machine so it finds the files
 
