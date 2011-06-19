@@ -10,8 +10,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from sqlalchemy.ext.sqlsoup import SqlSoup
 
-# get db_path from here
-execfile("MendeleyConfig.py")
+# set db_path here
+db_path = "/path/to/mendeley.sqlitedb"
 
 dsn_db = "sqlite:///%s" % db_path
 db_engine = sqlalchemy.create_engine(dsn_db, echo = False)
@@ -48,6 +48,8 @@ MDocumentFolders = Table('DocumentFolders', metadata,
 class MFile(object):
     def __repr__(self):
         return "[%s] %s" % (self.hash, self.localUrl)
+    def getFilePath(self):
+        return re.sub(r'^(file|broken):/+', '/', self.localUrl).replace('%20', ' ')
 mapper(MFile, tbl_Files, primary_key=[tbl_Files.c.hash])
 
 class MFolder(object):
@@ -59,6 +61,8 @@ class MDocumentContributor(object):
     documentId = Column(Integer, ForeignKey(tbl_Documents.c.id))
     def __repr__(self):
         return "%s, %s (%s)" % (self.lastName, self.firstNames, self.contribution)
+    def getFullName(self):
+        return "%s %s" % (self.firstNames, self.lastName)
 mapper(MDocumentContributor, tbl_DocumentContributors)
 
 class MDocumentKeyword(object):
